@@ -56,6 +56,14 @@ public class BluetoothConnection {
     public void setOnReadLineListener(OnReadLineListener onReadLineListener) {
         this.onReadLineListener = onReadLineListener;
     }
+    //发送消息
+    public void readLineMsg(String line){
+        if (manageConnectionThread != null){            
+            manageConnectionThread.sendLineMsg(line);
+        }
+
+
+    }
 
     class ManageConnectionThread extends Thread{
 
@@ -97,6 +105,17 @@ public class BluetoothConnection {
         private void cancel() {
             try {
                 socket.close();
+                manageConnectionThread = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void sendLineMsg(String line) {
+            line+="\n";
+            try {
+                out.write(line.getBytes("UTF-8"));
+                out.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
