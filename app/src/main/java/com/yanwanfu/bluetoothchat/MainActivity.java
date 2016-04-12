@@ -25,11 +25,14 @@ public class MainActivity extends AppCompatActivity {
     private DevicesListAdapter devicesListAdapter;
     private boolean scanning = false;
     private View viewProgress;
+    private BluetoothConnection connection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        connection = new BluetoothConnection(this);
 
         viewProgress = findViewById(R.id.viewProgress);
 
@@ -118,10 +121,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        connection.startServerSocket();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
 
         checkToStopScanDevices();
+        connection.stopServerSocket();
     }
 
     public void btnStartScanClicked(View view) {
