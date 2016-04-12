@@ -23,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this,"当前设备不支持蓝牙",Toast.LENGTH_SHORT).show();
             finish();
         }else{
-            if (!bluetoothAdapter.isEnabled()){ //启用蓝牙
+        //启用蓝牙
+            if (!bluetoothAdapter.isEnabled()){
                 Intent i = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(i, REQUEST_ENABLE_BT);
             }
@@ -47,12 +48,25 @@ public class MainActivity extends AppCompatActivity {
                                 .setPositiveButton("再次启用", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-
+                                        requestEnableBluetooth();
                                     }
-                                }).setNegativeButton("关闭");
+                                }).setNegativeButton("关闭", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        }).setCancelable(false).show();
 
                         break;
                 }
         }
+    }
+
+    /**
+     * 再次请求打开蓝牙
+     */
+    private void requestEnableBluetooth() {
+        Intent i = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(i, REQUEST_ENABLE_BT);
     }
 }
