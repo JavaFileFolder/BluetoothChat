@@ -170,17 +170,7 @@ public class MainActivity extends AppCompatActivity {
         viewProgress.setVisibility(View.GONE);
     }
 
-    /**
-     * 广播接收
-     *String action = intent.getAction();
-     // When discovery finds a device
-     if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-     // Get the BluetoothDevice object from the Intent
-     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-     // Add the name and address to an array adapter to show in a ListView
-     mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-     }
-     */
+
     private BroadcastReceiver deviceFoundReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -193,4 +183,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public void btnSendLineClicked(View view) {
+    }
 }

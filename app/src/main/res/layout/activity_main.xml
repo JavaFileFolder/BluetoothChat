@@ -6,45 +6,65 @@
     android:orientation="vertical"
     tools:context="com.yanwanfu.bluetoothchat.MainActivity">
 
-    <!--进度条-->
+
     <LinearLayout
-        android:id="@+id/viewProgress"
-        android:visibility="gone"
-        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <ProgressBar
+
+        <Button
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:text="正在扫描"
+            android:layout_height="wrap_content"
+            android:onClick="btnDiscoverableClicked"
+            android:text="设备可见" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="btnStartScanClicked"
+            android:text="开始扫描" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="btnStopScanClicked"
+            android:text="停止扫描" />
+        <!--进度条-->
+        <ProgressBar
+            android:visibility="gone"
+            android:id="@+id/viewProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
+
     <ListView
         android:id="@+id/lvDevices"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        />
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tvChatOutput"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-           android:onClick="btnDiscoverableClicked"
-            android:text="设备可见"
+
+        <EditText
+            android:id="@+id/etChatInput"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:singleLine="true" />
+
         <Button
-           android:onClick="btnStartScanClicked"
-            android:text="开始扫描"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-           android:onClick="btnStopScanClicked"
-            android:text="停止扫描"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:onClick="btnSendLineClicked"
+            android:text="发送" />
     </LinearLayout>
+
 
 </LinearLayout>
