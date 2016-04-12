@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.UUID;
 
 /**
@@ -19,6 +22,8 @@ public class BluetoothConnection {
     private static final UUID MY_UUID = UUID.fromString("840edf1d-1a7f-4758-9b62-bb1237f4550a");
     private final Activity context;
     private AcceptThread acceptThread =null;
+    private ManageConnectionThread manageConnectionThread = null;
+    private OnReadLineListener onReadLineListener = null;
 
     public BluetoothConnection(Activity context){
         this.context = context;
@@ -38,22 +43,67 @@ public class BluetoothConnection {
         }
     }
 
-    class ManagerConnectionThread extends Thread{
+    public void manageConnection(BluetoothSocket socket){
+        manageConnectionThread = new ManageConnectionThread(socket);
+        new ManageConnectionThread(socket).start();
+    }
+
+    //get 监听器
+    public OnReadLineListener getOnReadLineListener() {
+        return onReadLineListener;
+    }
+    //set 监听器
+    public void setOnReadLineListener(OnReadLineListener onReadLineListener) {
+        this.onReadLineListener = onReadLineListener;
+    }
+
+    class ManageConnectionThread extends Thread{
 
         private BluetoothSocket socket;
+        private InputStream in;
+        private OutputStream out;
 
-        public ManagerConnectionThread( BluetoothSocket socket) {
+        public ManageConnectionThread( BluetoothSocket socket) {
             this.socket = socket;
-
         }
 
         @Override
         public void run() {
             super.run();
+            try {
+                out = socket.getOutputStream();
+                in = socket.getInputStream();
 
-            // TODO: 2016/4/12  
+                BufferedReader br = new BufferedReader(new InputStreamReader(in,"UTF-8"));
+                String line = null;
+
+                while((line=br.readLine())!=null){
+                    if (getOnReadLineListener() != null){
+                        getOnReadLineListener().onRead(line);//传出数据
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            cancel();
+            context.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context,"已经断开连接",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void cancel() {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
+
+
 
     class AcceptThread extends Thread{
 
@@ -97,7 +147,7 @@ public class BluetoothConnection {
 
                 }
                 if (socket!=null){
-                    new ManagerConnectionThread(socket).start();
+                    manageConnection(socket);
                     cancel();
                 }
             }
@@ -113,7 +163,11 @@ public class BluetoothConnection {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
+    }
+
+    //监听器
+    interface OnReadLineListener{
+        void onRead(String line);
     }
 }
