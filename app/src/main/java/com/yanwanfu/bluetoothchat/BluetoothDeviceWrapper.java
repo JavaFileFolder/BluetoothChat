@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
  * 蓝牙实体类.
  */
 public class BluetoothDeviceWrapper {
+
     private final BluetoothDevice device;
 
     public BluetoothDeviceWrapper(BluetoothDevice device) {

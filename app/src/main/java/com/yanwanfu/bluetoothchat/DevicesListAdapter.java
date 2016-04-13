@@ -31,7 +31,7 @@ public class DevicesListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public BluetoothDeviceWrapper getItem(int position) {
         return items.get(position);
     }
 

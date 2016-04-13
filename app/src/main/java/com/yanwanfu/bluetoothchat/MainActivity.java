@@ -11,13 +11,17 @@ import android.content.IntentFilter;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, BluetoothConnection.OnReadNewLineListener {
 
     private static final int REQUEST_ENABLE_BT = 1000;
     private BluetoothAdapter bluetoothAdapter;
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean scanning = false;
     private View viewProgress;
     private BluetoothConnection connection;
+    private EditText etInput;
+    private TextView tvOutput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,12 +39,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         connection = new BluetoothConnection(this);
+        connection.setOnReadNewLineListener(this);
 
         viewProgress = findViewById(R.id.viewProgress);
 
         lvDevices = (ListView) findViewById(R.id.lvDevices);
         devicesListAdapter = new DevicesListAdapter(this, android.R.layout.simple_list_item_1);
         lvDevices.setAdapter(devicesListAdapter);
+        //列表监听
+        lvDevices.setOnItemClickListener(this);
+
+        etInput = (EditText) findViewById(R.id.etChatInput);
+        tvOutput = (TextView) findViewById(R.id.tvChatOutput);
 
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();// 蓝牙对象
@@ -184,5 +196,27 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void btnSendLineClicked(View view) {
+        //非空
+        if (!TextUtils.isEmpty(etInput.getText())){
+            //发送
+            connection.sendLine(etInput.getText().toString());
+        }
+
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //连接另一个设备
+        connection.connect(devicesListAdapter.getItem(position).getDevice());
+    }
+
+    @Override
+    public void onRead(final String line, final BluetoothDevice remoteDevice) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tvOutput.append(remoteDevice.getName()+":"+line+"\n");
+            }
+        });
     }
 }
