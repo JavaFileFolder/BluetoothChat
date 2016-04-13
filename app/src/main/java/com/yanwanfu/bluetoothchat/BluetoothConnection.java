@@ -20,11 +20,12 @@ import java.util.UUID;
 public class BluetoothConnection {
 
     private static final String NAME = "BluetoothChat";
-    private static final UUID MY_UUID = UUID.fromString("840edf1d-1a7f-4758-9b62-bb1237f4550a");
+//    private static final UUID MY_UUID = UUID.fromString("840edf1d-1a7f-4758-9b62-bb1237f4550a");
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private final Activity context;
     private AcceptThread acceptThread = null;
     private ManageConnectionThread manageConnectionThread = null;
-    private OnReadLineListener onReadLineListener = null;
+    private OnReadNewLineListener onReadNewLineListener = null;
 
     public BluetoothConnection(Activity context) {
         this.context = context;
@@ -49,23 +50,23 @@ public class BluetoothConnection {
     //管理连接
     public void manageConnection(BluetoothSocket socket) {
         manageConnectionThread = new ManageConnectionThread(socket);
-        new ManageConnectionThread(socket).start();
+        manageConnectionThread.start();
     }
 
     //get 监听器
-    public OnReadLineListener getOnReadLineListener() {
-        return onReadLineListener;
+    public OnReadNewLineListener getOnReadNewLineListener() {
+        return onReadNewLineListener;
     }
 
     //set 监听器
-    public void setOnReadLineListener(OnReadLineListener onReadLineListener) {
-        this.onReadLineListener = onReadLineListener;
+    public void setOnReadNewLineListener(OnReadNewLineListener onReadNewLineListener) {
+        this.onReadNewLineListener = onReadNewLineListener;
     }
 
     //发送消息
-    public void sendLineMsg(String line) {
+    public void sendLine(String line) {
         if (manageConnectionThread != null) {
-            manageConnectionThread.sendLineMsg(line);
+            manageConnectionThread.sendLine(line);
         }
     }
 
@@ -81,7 +82,7 @@ public class BluetoothConnection {
      * 连接类
      */
     class ConnectThread extends Thread {
-        private final BluetoothDevice device;
+        private BluetoothDevice device = null;
         private BluetoothSocket socket=null;
 
         public ConnectThread(BluetoothDevice device) {
@@ -101,8 +102,15 @@ public class BluetoothConnection {
                 return;
             }
             try {
-                socket.connect();       //执行连接
+                socket.connect();           //执行连接
                 manageConnection(socket);   //管理连接
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context,"成功连接设备",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             } catch (IOException e) {
                 e.printStackTrace();
                 context.runOnUiThread(new Runnable() {
@@ -140,8 +148,8 @@ public class BluetoothConnection {
                 String line = null;
 
                 while ((line = br.readLine()) != null) {
-                    if (getOnReadLineListener() != null) {
-                        getOnReadLineListener().onRead(line);//传出数据
+                    if (getOnReadNewLineListener() != null) {
+                        getOnReadNewLineListener().onRead(line,socket.getRemoteDevice());//传出数据
                     }
                 }
             } catch (IOException e) {
@@ -165,9 +173,9 @@ public class BluetoothConnection {
             }
         }
 
-        public void sendLineMsg(String line) {
-            line += "\n";
+        public void sendLine(String line) {
             try {
+                line += "\n";
                 out.write(line.getBytes("UTF-8"));
                 out.flush();
             } catch (IOException e) {
@@ -222,8 +230,8 @@ public class BluetoothConnection {
 
                 }
                 if (socket != null) {
-                    manageConnection(socket);
                     cancel();
+                    manageConnection(socket);
                 }
             }
         }
@@ -245,7 +253,7 @@ public class BluetoothConnection {
     /**
      * 监听器
      */
-    interface OnReadLineListener {
-        void onRead(String line);
+    interface OnReadNewLineListener {
+        void onRead(String line,BluetoothDevice remoteDevice);
     }
 }
